@@ -21,8 +21,7 @@ public class WeatherService {
     private final PincodeRepository pincodeRepository;
     private final WeatherRepository weatherRepository;
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper; // JSON parsing ke liye robust tool
-
+    private final ObjectMapper objectMapper;
     @Value("${weather.api.key}")
     private String apiKey;
 
@@ -36,32 +35,23 @@ public class WeatherService {
         this.objectMapper = objectMapper;
     }
 
-    @Transactional // Transaction fail hone par data rollback karega (Robustness)
+    @Transactional
     public WeatherEntity getWeatherInfo(String pincode, LocalDate forDate) {
 
-        // --- STEP 1: OPTIMIZATION CHECK (Cache Hit) ---
-        // Sabse pehle DB check karo. Agar data hai, toh API call bacha lo.
         Optional<WeatherEntity> cachedWeather = weatherRepository.findByPincodeEntity_PincodeAndForDate(pincode, forDate);
         if (cachedWeather.isPresent()) {
             System.out.println("Returning Weather Data from Database (No API Call)");
             return cachedWeather.get();
         }
 
-        // --- STEP 2: LOCATION CHECK ---
-        // Agar weather nahi mila, toh check karo kya Pincode ka Lat/Long hamare paas hai?
         PincodeEntity pincodeEntity = pincodeRepository.findByPincode(pincode)
                 .orElseGet(() -> fetchAndSaveLatLong(pincode)); // Agar nahi hai, toh Geocoding API call karo
 
-        // --- STEP 3: FETCH WEATHER FROM API ---
-        // Ab hamare paas Lat/Long hai, OpenWeather API call karo
         WeatherEntity newWeather = fetchWeatherFromApi(pincodeEntity, forDate);
 
-        // --- STEP 4: SAVE TO DB (Cache Miss -> Store) ---
-        // Future calls ke liye data save karo
         return weatherRepository.save(newWeather);
     }
 
-    // Helper Method 1: Geocoding API (Pincode -> Lat/Long)
     private PincodeEntity fetchAndSaveLatLong(String pincode) {
         System.out.println("Fetching Lat/Long from OpenWeather Geocoding API...");
 
@@ -79,19 +69,14 @@ public class WeatherService {
             entity.setLatitude(root.path("lat").asDouble());
             entity.setLongitude(root.path("lon").asDouble());
 
-            return pincodeRepository.save(entity); // Lat/Long save kar diya
+            return pincodeRepository.save(entity);
         } catch (Exception e) {
             throw new RuntimeException("Invalid Pincode or API Error: " + e.getMessage());
         }
     }
 
-    // Helper Method 2: Weather API (Lat/Long -> Weather Info)
     private WeatherEntity fetchWeatherFromApi(PincodeEntity pincodeEntity, LocalDate forDate) {
         System.out.println("Fetching Weather from OpenWeather API...");
-
-        // NOTE: Free OpenWeather API sirf 'Current' weather deta hai.
-        // Assignment ki requirement puri karne ke liye hum current weather laayenge,
-        // lekin use requested 'forDate' ke saath save karenge taaki caching logic test ho sake.
 
         String url = UriComponentsBuilder.fromHttpUrl("https://api.openweathermap.org/data/2.5/weather")
                 .queryParam("lat", pincodeEntity.getLatitude())

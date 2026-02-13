@@ -17,15 +17,14 @@ public class WeatherEntity {
 
     private Double temperature;
 
-    private String description; // Example: "Light Rain"
+    private String description;
 
-    // Relational Mapping
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pincode_id", referencedColumnName = "pincode", nullable = false)
     @JsonIgnore
     private PincodeEntity pincodeEntity;
 
-    // --- Constructors ---
 
     public WeatherEntity() {
     }
@@ -37,7 +36,6 @@ public class WeatherEntity {
         this.pincodeEntity = pincodeEntity;
     }
 
-    // --- Manual Getters & Setters ---
 
     public Long getId() {
         return id;

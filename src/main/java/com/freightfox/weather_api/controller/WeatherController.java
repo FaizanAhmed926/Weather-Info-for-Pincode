@@ -16,15 +16,10 @@ public class WeatherController {
 
     private final WeatherService weatherService;
 
-    // Constructor Injection (Best Practice)
     public WeatherController(WeatherService weatherService) {
         this.weatherService = weatherService;
     }
 
-    /**
-     * Endpoint: GET /api/weather
-     * Example: /api/weather?pincode=411014&for_date=2020-10-15
-     */
     @GetMapping("/weather")
     public ResponseEntity<?> getWeather(
             @RequestParam(name = "pincode") String pincode,
@@ -33,19 +28,16 @@ public class WeatherController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate forDate
     ) {
         try {
-            // Validation: Pincode khali nahi hona chahiye
             if (pincode == null || pincode.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("Error: Pincode cannot be empty");
             }
 
-            // Service call logic
             WeatherEntity weatherData = weatherService.getWeatherInfo(pincode, forDate);
 
             return ResponseEntity.ok(weatherData);
 
         } catch (Exception e) {
-            // Agar koi error aata hai (jaise API fail ho gayi, ya pincode galat hai)
-            // toh hum server crash hone ke bajaye user ko readable error denge.
+
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("status", "error");
             errorResponse.put("message", e.getMessage());

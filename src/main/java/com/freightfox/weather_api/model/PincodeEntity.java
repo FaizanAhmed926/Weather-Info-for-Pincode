@@ -8,7 +8,7 @@ public class PincodeEntity {
 
     @Id
     @Column(name = "pincode", nullable = false, unique = true, length = 10)
-    private String pincode; // Example: "411014"
+    private String pincode;
 
     @Column(nullable = false)
     private Double latitude;
@@ -16,20 +16,16 @@ public class PincodeEntity {
     @Column(nullable = false)
     private Double longitude;
 
-    // --- Constructors ---
 
-    // Empty Constructor (Required by JPA)
     public PincodeEntity() {
     }
 
-    // All Arguments Constructor
     public PincodeEntity(String pincode, Double latitude, Double longitude) {
         this.pincode = pincode;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    // --- Getters and Setters (Manual) ---
 
     public String getPincode() {
         return pincode;

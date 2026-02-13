@@ -9,7 +9,5 @@ import java.util.Optional;
 @Repository
 public interface PincodeRepository extends JpaRepository<PincodeEntity, String> {
 
-    // Custom method: Pincode se Lat/Long dhundne ke liye
-    // Return Optional taaki null pointer exception se bacha ja sake (Robustness)
     Optional<PincodeEntity> findByPincode(String pincode);
 }
