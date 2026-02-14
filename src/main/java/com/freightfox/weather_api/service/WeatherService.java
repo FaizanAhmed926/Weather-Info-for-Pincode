@@ -45,7 +45,7 @@ public class WeatherService {
         }
 
         PincodeEntity pincodeEntity = pincodeRepository.findByPincode(pincode)
-                .orElseGet(() -> fetchAndSaveLatLong(pincode)); // Agar nahi hai, toh Geocoding API call karo
+                .orElseGet(() -> fetchAndSaveLatLong(pincode));
 
         WeatherEntity newWeather = fetchWeatherFromApi(pincodeEntity, forDate);
 
@@ -91,7 +91,7 @@ public class WeatherService {
 
             WeatherEntity weather = new WeatherEntity();
             weather.setPincodeEntity(pincodeEntity);
-            weather.setForDate(forDate); // Requested date set kar rahe hain caching ke liye
+            weather.setForDate(forDate); 
             weather.setDescription(root.path("weather").get(0).path("description").asText());
             weather.setTemperature(root.path("main").path("temp").asDouble());
 
