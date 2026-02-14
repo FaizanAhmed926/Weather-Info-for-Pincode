@@ -20,9 +20,8 @@ public class WeatherEntity {
     private String description;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pincode_id", referencedColumnName = "pincode", nullable = false)
-    @JsonIgnore
     private PincodeEntity pincodeEntity;
 
 
